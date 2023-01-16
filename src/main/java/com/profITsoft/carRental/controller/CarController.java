@@ -3,6 +3,7 @@ package com.profITsoft.carRental.controller;
 import com.profITsoft.carRental.dto.CarDTO;
 import com.profITsoft.carRental.exeption.CarValidationException;
 import com.profITsoft.carRental.service.serviceInterface.CarService;
+import com.profITsoft.carRental.validations.ErrorValidator;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -21,10 +22,12 @@ public class CarController {
     private static final int DEFAULT_PAGE_SIZE = 10;
 
     private final CarService carService;
+    private final ErrorValidator errorValidator;
 
     @Autowired
-    public CarController(CarService carService) {
+    public CarController(CarService carService, ErrorValidator errorValidator) {
         this.carService = carService;
+        this.errorValidator = errorValidator;
     }
 
     @GetMapping("/all/{page}")
@@ -54,16 +57,18 @@ public class CarController {
 
     @PostMapping("/create")
     public ResponseEntity<Long> createCat(@RequestBody @Valid CarDTO carDTO, BindingResult bindingResult){
-        if(bindingResult.hasErrors()){
-            throw new CarValidationException(bindingResult.getAllErrors().toString());
+        String errorMassage = errorValidator.checkErrors(bindingResult);
+        if(!errorMassage.equals("")){
+            throw new CarValidationException(errorMassage);
         }
         return new ResponseEntity<>(carService.createCar(carDTO).getId(), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<Long> updateCar(@RequestBody @Valid CarDTO carDTO, @PathVariable("id") Long id, BindingResult bindingResult){
-        if(bindingResult.hasErrors()){
-            throw new CarValidationException(bindingResult.getAllErrors().toString());
+        String errorMassage = errorValidator.checkErrors(bindingResult);
+        if(!errorMassage.equals("")){
+            throw new CarValidationException(errorMassage);
         }
         return ResponseEntity.ok(carService.updateCar(id, carDTO).getId());
     }
@@ -72,6 +77,16 @@ public class CarController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCar(@PathVariable("id") Long id){
         carService.deleteCar(id);
+    }
+
+    @ExceptionHandler(CarValidationException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<String> handleNoSuchElementFoundException(
+            CarValidationException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(exception.getMessage());
     }
 
 }
