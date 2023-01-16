@@ -72,22 +72,14 @@ public class DriverServiceI implements DriverService {
         return driverRepository.save(newInfo);
     }
 
-    @Override
-    @Transactional
-    public void setDriverStatus(Long id) {
-        boolean oldStatus = findDriver(id).isActive();
-        driverRepository.setDriverStatus(!oldStatus, id);
-    }
-
     private Driver driverDtoToDriver(DriverDTO driverDTO){
         Driver driver = new Driver();
         driver.setFirstName(driverDTO.getFirstName());
         driver.setLastName(driverDTO.getLastName());
-        driver.setActive(driverDTO.isActive());
         if(driverDTO.getAllCars()!=null){
-            driver.setCarSet(driverDTO.getAllCars().stream()
+            driver.setCarList(driverDTO.getAllCars().stream()
                     .map(car -> carRepository.findById(car.getId()).orElseThrow(NotFoundException::new))
-                    .collect(Collectors.toSet()));
+                    .collect(Collectors.toList()));
         }
         return driver;
     }

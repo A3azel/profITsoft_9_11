@@ -117,6 +117,48 @@ public class CarControllerTest {
     }
 
     @Test
+    public void testCreateWithWrongBody() throws Exception{
+        mvc.perform(post("/api/v1/car/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("wrongBody")
+                )
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void testCreateWithEmptyField() throws Exception{
+        String carName = "S-Class";
+        String brand = "Mercedes-Benz";
+        BigDecimal prise = BigDecimal.valueOf(85_000.00).setScale(2);
+        LocalDate releaseDate = LocalDate.of(2016,5,18);
+        Long driverId = 0L;
+        String body =String.format(Locale.ROOT, CAR_JSON_BODY,carName, brand, prise, releaseDate, driverId);
+
+        mvc.perform(post("/api/v1/car/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                )
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testCreateWithNotExistingDriver() throws Exception{
+        String carName = "";
+        String brand = "";
+        BigDecimal prise = BigDecimal.valueOf(85_000.00).setScale(2);
+        LocalDate releaseDate = LocalDate.of(2016,5,18);
+        Long driverId = 1L;
+        String body =String.format(Locale.ROOT, CAR_JSON_BODY,carName, brand, prise, releaseDate, driverId);
+
+        mvc.perform(post("/api/v1/car/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                )
+                .andExpect(status().isBadRequest());
+    }
+
+
+    @Test
     public void testUpdateCarInfo() throws Exception {
         Car car = new Car();
         car.setCarName("S-Class");

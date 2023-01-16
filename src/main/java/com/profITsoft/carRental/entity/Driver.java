@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -28,11 +29,8 @@ public class Driver {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "is_active")
-    private boolean active;
-
     @OneToMany(mappedBy = "driver", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIdentityReference(alwaysAsId = true)
     @Nullable
-    private Set<Car> carSet;
+    private List<Car> carList;
 }

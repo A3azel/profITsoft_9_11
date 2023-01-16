@@ -45,12 +45,6 @@ public class DriverController {
         return ResponseEntity.ok(driverService.updateDriver(id, driverDTO).getId());
     }
 
-    @PatchMapping("/update/status/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public void updateDriverStatus(@PathVariable("id") Long id){
-        driverService.setDriverStatus(id);
-    }
-
     @DeleteMapping("/delete/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteDriver(@PathVariable("id") Long id){

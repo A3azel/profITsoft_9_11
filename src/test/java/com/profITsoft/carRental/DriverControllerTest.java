@@ -1,6 +1,8 @@
 package com.profITsoft.carRental;
 
+import com.profITsoft.carRental.entity.Car;
 import com.profITsoft.carRental.entity.Driver;
+import com.profITsoft.carRental.exeption.NotFoundException;
 import com.profITsoft.carRental.repository.CarRepository;
 import com.profITsoft.carRental.repository.DriverRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -14,9 +16,12 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Locale;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -35,8 +40,7 @@ public class DriverControllerTest {
     private static final String DRIVER_JSON_BODY = """
                   {
                        "firstName": "%s",
-                       "lastName": "%s",
-                       "active": %b
+                       "lastName": "%s"
                   }             
                 """;
 
@@ -44,10 +48,10 @@ public class DriverControllerTest {
     private MockMvc mvc;
 
     @Autowired
-    private CarRepository carRepository;
+    private DriverRepository driverRepository;
 
     @Autowired
-    private DriverRepository driverRepository;
+    private CarRepository carRepository;
 
     @AfterEach
     public void afterEach() {
@@ -57,9 +61,8 @@ public class DriverControllerTest {
     @Test
     public void testFindDriverByID() throws Exception {
         Driver driver = new Driver();
-        driver.setFirstName("Driver1");
-        driver.setLastName("Driver1");
-        driver.setActive(true);
+        driver.setFirstName("DriverFirstname");
+        driver.setLastName("DriverLastname");
 
         Long createdDriverId = driverRepository.save(driver).getId();
 
@@ -68,22 +71,57 @@ public class DriverControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.firstName", is("Driver1")))
-                .andExpect(jsonPath("$.lastName", is("Driver1")))
-                .andExpect(jsonPath("$.active", is(true)));
+                .andExpect(jsonPath("$.firstName", is("DriverFirstname")))
+                .andExpect(jsonPath("$.lastName", is("DriverLastname")));
     }
 
     @Test
     public void testFindAllDriverCars() throws Exception {
+        Driver driver = new Driver();
+        driver.setFirstName("DriverFirstname");
+        driver.setLastName("DriverLastname");
+
+        Driver secondDriver = new Driver();
+        secondDriver.setFirstName("DriverFirstname2");
+        secondDriver.setLastName("DriverLastname2");
+
+        Long createdDriverId = driverRepository.save(driver).getId();
+
+        Car car1 = new Car();
+        car1.setCarName("S-Class");
+        car1.setBrand("Mercedes-Benz");
+        car1.setCarPrise(BigDecimal.valueOf(90_000.00));
+        car1.setReleaseDate(LocalDate.of(2016,5,18));
+        car1.setDriver(driverRepository.findById(createdDriverId).orElseThrow(NotFoundException::new));
+        carRepository.save(car1);
+
+        Car car2 = new Car();
+        car2.setCarName("X5");
+        car2.setBrand("BMW");
+        car2.setCarPrise(BigDecimal.valueOf(49_999.00));
+        car2.setReleaseDate(LocalDate.of(2018,8,15));
+        car2.setDriver(driverRepository.findById(createdDriverId).orElseThrow(NotFoundException::new));
+        carRepository.save(car2);
+
+        mvc.perform(get("/api/v1/driver/all/cars/"+createdDriverId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].carName", is("S-Class")))
+                .andExpect(jsonPath("$[1].carName", is("X5")))
+                .andExpect(jsonPath("$[0].brand", is("Mercedes-Benz")))
+                .andExpect(jsonPath("$[1].brand", is("BMW")));
+
 
     }
 
     @Test
     public void testCreateDriver() throws Exception {
-        String firstName = "Driver1";
-        String lastName = "Driver1";
-        boolean active = true;
-        String body =String.format(Locale.ROOT, DRIVER_JSON_BODY, firstName, lastName, active);
+        String firstName = "DriverFirstname";
+        String lastName = "DriverLastname";
+        String body =String.format(Locale.ROOT, DRIVER_JSON_BODY, firstName, lastName);
 
         MvcResult mvcResult = mvc.perform(post("/api/v1/driver/create")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -92,29 +130,24 @@ public class DriverControllerTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        String createdDriverId = mvcResult.getResponse().getContentAsString();
+        Long createdDriverId = Long.parseLong(mvcResult.getResponse().getContentAsString());
 
-        mvc.perform(get("/api/v1/driver/"+createdDriverId)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.firstName", is("Driver1")))
-                .andExpect(jsonPath("$.lastName", is("Driver1")))
-                .andExpect(jsonPath("$.active", is(true)));
+        Driver createdDriver = driverRepository.findById(createdDriverId).orElse(null);
 
+        Assertions.assertNotNull(createdDriver);
+        Assertions.assertEquals(createdDriver.getFirstName(),"DriverFirstname");
+        Assertions.assertEquals(createdDriver.getLastName(),"DriverLastname");
     }
 
     @Test
     public void testUpdateDriver() throws Exception {
         Driver driver = new Driver();
-        driver.setFirstName("Driver1");
-        driver.setLastName("Driver1");
-        driver.setActive(true);
+        driver.setFirstName("DriverFirstname");
+        driver.setLastName("DriverLastname");
 
         Long createdDriverId = driverRepository.save(driver).getId();
 
-        String updatedDriverInfo =String.format(Locale.ROOT, DRIVER_JSON_BODY,"NewDriverName", "NewDriverLastname", false);
+        String updatedDriverInfo =String.format(Locale.ROOT, DRIVER_JSON_BODY,"NewDriverName", "NewDriverLastname");
 
         mvc.perform(put("/api/v1/driver/update/"+createdDriverId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -127,21 +160,14 @@ public class DriverControllerTest {
         Assertions.assertNotNull(updatedDriver);
         Assertions.assertEquals(updatedDriver.getFirstName(),"NewDriverName");
         Assertions.assertEquals(updatedDriver.getLastName(),"NewDriverLastname");
-        Assertions.assertFalse(updatedDriver.isActive());
-
-    }
-
-    @Test
-    public void testSetDriverStatus(){
 
     }
 
     @Test
     public void testDeleteDriver() throws Exception {
         Driver driver = new Driver();
-        driver.setFirstName("Driver1");
-        driver.setLastName("Driver1");
-        driver.setActive(true);
+        driver.setFirstName("DriverFirstname");
+        driver.setLastName("DriverLastname");
 
         Long createdDriverId = driverRepository.save(driver).getId();
 
