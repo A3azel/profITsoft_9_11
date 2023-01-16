@@ -81,10 +81,6 @@ public class DriverControllerTest {
         driver.setFirstName("DriverFirstname");
         driver.setLastName("DriverLastname");
 
-        Driver secondDriver = new Driver();
-        secondDriver.setFirstName("DriverFirstname2");
-        secondDriver.setLastName("DriverLastname2");
-
         Long createdDriverId = driverRepository.save(driver).getId();
 
         Car car1 = new Car();
@@ -113,7 +109,31 @@ public class DriverControllerTest {
                 .andExpect(jsonPath("$[1].carName", is("X5")))
                 .andExpect(jsonPath("$[0].brand", is("Mercedes-Benz")))
                 .andExpect(jsonPath("$[1].brand", is("BMW")));
+    }
 
+    @Test
+    public void testFindAllDrivers() throws Exception{
+        Driver driver = new Driver();
+        driver.setFirstName("DriverFirstname");
+        driver.setLastName("DriverLastname");
+
+        Driver secondDriver = new Driver();
+        secondDriver.setFirstName("DriverFirstname2");
+        secondDriver.setLastName("DriverLastname2");
+
+        driverRepository.save(driver);
+        driverRepository.save(secondDriver);
+
+        mvc.perform(get("/api/v1/driver/all/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].firstName", is("DriverFirstname")))
+                .andExpect(jsonPath("$[1].firstName", is("DriverFirstname2")))
+                .andExpect(jsonPath("$[0].lastName", is("DriverLastname")))
+                .andExpect(jsonPath("$[1].lastName", is("DriverLastname2")));
 
     }
 

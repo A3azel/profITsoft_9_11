@@ -5,6 +5,8 @@ import com.profITsoft.carRental.dto.DriverDTO;
 import com.profITsoft.carRental.service.serviceInterface.DriverService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +36,13 @@ public class DriverController {
         List<CarDTO> allDriverCars = driverService.getAllDriverCars(id);
         return ResponseEntity.ok(allDriverCars);
     }
+
+    @GetMapping("/all/{page}")
+    public ResponseEntity<List<DriverDTO>> getAllDrivers(@PageableDefault(size = DEFAULT_PAGE_SIZE) Pageable pageable, @PathVariable("page") int page){
+        List<DriverDTO> allDrivers = driverService.getAllDrivers(pageable, page);
+        return ResponseEntity.ok(allDrivers);
+    }
+
 
     @PostMapping("/create")
     public ResponseEntity<Long> createDriver(@RequestBody @Valid DriverDTO driverDTO){
