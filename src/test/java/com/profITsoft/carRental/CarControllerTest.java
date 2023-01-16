@@ -89,6 +89,13 @@ public class CarControllerTest {
     }
 
     @Test
+    public void testFindNotExistingCarById() throws Exception {
+        mvc.perform(get("/api/v1/car/0")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     public void testCreateCar() throws Exception{
         String carName = "S-Class";
         String brand = "Mercedes-Benz";
@@ -235,6 +242,31 @@ public class CarControllerTest {
                 .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))))
                 .andExpect(jsonPath("$[0].carName", is("X5")))
                 .andExpect(jsonPath("$[0].carPrise", is(49_999.00)));
+    }
+
+    @Test
+    public void testFindAllCarsByNotExistingBrand() throws Exception {
+        Car car1 = new Car();
+        car1.setCarName("S-Class");
+        car1.setBrand("Mercedes-Benz");
+        car1.setCarPrise(BigDecimal.valueOf(90_000.00));
+        car1.setReleaseDate(LocalDate.of(2016,5,18));
+        car1.setDriver(driverRepository.findById(1L).orElseThrow(NotFoundException::new));
+        carRepository.save(car1);
+
+        Car car2 = new Car();
+        car2.setCarName("X5");
+        car2.setBrand("BMW");
+        car2.setCarPrise(BigDecimal.valueOf(49_999.00));
+        car2.setReleaseDate(LocalDate.of(2018,8,15));
+        car2.setDriver(driverRepository.findById(1L).orElseThrow(NotFoundException::new));
+        carRepository.save(car2);
+
+        mvc.perform(get("/api/v1/car/all/brand/Porsche/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(0))));
     }
 
     @Test
