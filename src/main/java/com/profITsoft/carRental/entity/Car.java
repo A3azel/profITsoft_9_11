@@ -37,9 +37,9 @@ public class Car {
     private LocalDate releaseDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    //@ManyToOne
     @JoinColumn(name = "driver_id")
     @JsonIdentityReference(alwaysAsId = true)
-    //@JsonManagedReference
     private Driver driver;
 
 }

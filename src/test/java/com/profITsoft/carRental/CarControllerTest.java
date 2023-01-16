@@ -5,6 +5,7 @@ import com.profITsoft.carRental.exeption.NotFoundException;
 import com.profITsoft.carRental.repository.CarRepository;
 import com.profITsoft.carRental.repository.DriverRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -65,13 +66,36 @@ public class CarControllerTest {
     }
 
     @Test
+    public void testFindCarById() throws Exception{
+        Car car = new Car();
+        car.setCarName("S-Class");
+        car.setBrand("Mercedes-Benz");
+        car.setCarPrise(BigDecimal.valueOf(90_000.00));
+        car.setReleaseDate(LocalDate.of(2016,5,18));
+        car.setDriver(driverRepository.findById(1L).orElseThrow(NotFoundException::new));
+
+        Long createdCarId = carRepository.save(car).getId();
+
+        mvc.perform(get("/api/v1/car/"+createdCarId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.carName", is("S-Class")))
+                .andExpect(jsonPath("$.brand", is("Mercedes-Benz")))
+                .andExpect(jsonPath("$.carPrise", is(90000.00)))
+                .andExpect(jsonPath("$.releaseDate", is(LocalDate.of(2016,5,18).toString())))
+                .andExpect(jsonPath("$.driverId", is(1)));
+    }
+
+    @Test
     public void testCreateCar() throws Exception{
         String carName = "S-Class";
         String brand = "Mercedes-Benz";
-        BigDecimal prise = BigDecimal.valueOf(85_000.00);
+        BigDecimal prise = BigDecimal.valueOf(85_000.00).setScale(2);
         LocalDate releaseDate = LocalDate.of(2016,5,18);
-        Long userId = 1L;
-        String body =String.format(Locale.ROOT, CAR_JSON_BODY,carName, brand, prise, releaseDate, userId);
+        Long driverId = 1L;
+        String body =String.format(Locale.ROOT, CAR_JSON_BODY,carName, brand, prise, releaseDate, driverId);
 
         MvcResult mvcResult = mvc.perform(post("/api/v1/car/create")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -80,14 +104,16 @@ public class CarControllerTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        String createdCarId = mvcResult.getResponse().getContentAsString();
+        Long createdCarId = Long.parseLong(mvcResult.getResponse().getContentAsString());
 
-        mvc.perform(get("/api/v1/car/"+createdCarId)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.brand", is("Mercedes-Benz")));
+        Car createdCar = carRepository.findById(createdCarId).orElse(null);
+
+        Assertions.assertNotNull(createdCar);
+        Assertions.assertEquals(createdCar.getCarName(),carName);
+        Assertions.assertEquals(createdCar.getBrand(),brand);
+        Assertions.assertEquals(createdCar.getCarPrise(),prise);
+        Assertions.assertEquals(createdCar.getReleaseDate(),releaseDate);
+        Assertions.assertEquals(createdCar.getDriver().getId(),driverId);
     }
 
     @Test
@@ -103,9 +129,9 @@ public class CarControllerTest {
 
         String newCarName = "GLE-Class";
         String newBrand = "Mercedes-Benz";
-        BigDecimal newPrise = BigDecimal.valueOf(49_999.00);
-        LocalDate newReleaseDate = LocalDate.of(2016,5,18);
-        Long newUserId = 1L;
+        BigDecimal newPrise = BigDecimal.valueOf(49_999.00).setScale(2);
+        LocalDate newReleaseDate = LocalDate.of(2019,1,3);
+        Long newUserId = 2L;
         String newBody =String.format(Locale.ROOT, CAR_JSON_BODY,newCarName, newBrand, newPrise, newReleaseDate, newUserId);
 
         mvc.perform(put("/api/v1/car/update/"+createdCarId)
@@ -114,12 +140,14 @@ public class CarControllerTest {
                 )
                 .andExpect(status().isOk());
 
-        mvc.perform(get("/api/v1/car/"+createdCarId)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.carName", is("GLE-Class")))
-                .andExpect(jsonPath("$.carPrise", is(49_999.00)));
+        Car updatedCar = carRepository.findById(createdCarId).orElse(null);
+
+        Assertions.assertNotNull(updatedCar);
+        Assertions.assertEquals(updatedCar.getCarName(),newCarName);
+        Assertions.assertEquals(updatedCar.getBrand(),newBrand);
+        Assertions.assertEquals(updatedCar.getCarPrise(),newPrise);
+        Assertions.assertEquals(updatedCar.getReleaseDate(),newReleaseDate);
+        Assertions.assertEquals(updatedCar.getDriver().getId(),newUserId);
     }
 
     @Test
@@ -135,9 +163,9 @@ public class CarControllerTest {
         mvc.perform(delete("/api/v1/car/delete/"+createdCarId))
                 .andExpect(status().isNoContent());
 
-        mvc.perform(get("/api/v1/car/"+createdCarId)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+        Car deletedCar = carRepository.findById(createdCarId).orElse(null);
+
+        Assertions.assertNull(deletedCar);
     }
 
     @Test

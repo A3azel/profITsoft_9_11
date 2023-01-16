@@ -1,6 +1,7 @@
 package com.profITsoft.carRental.entity;
 
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,6 +33,6 @@ public class Driver {
 
     @OneToMany(mappedBy = "driver", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JsonIdentityReference(alwaysAsId = true)
-    //@JsonBackReference
+    @Nullable
     private Set<Car> carSet;
 }

@@ -1,6 +1,7 @@
 package com.profITsoft.carRental.dto;
 
 import com.profITsoft.carRental.entity.Driver;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -22,6 +23,7 @@ public class DriverDTO {
     private String lastName;
     @NotNull(message = "This field can't be blank")
     private boolean active;
+    @Nullable
     private Set<CarDTO> allCars;
 
     public static DriverDTO createDriverDTO(Driver driver){
