@@ -1,6 +1,7 @@
 package com.profITsoft.carRental.controller;
 
 import com.profITsoft.carRental.dto.CarDTO;
+import com.profITsoft.carRental.exeption.CarValidationException;
 import com.profITsoft.carRental.service.serviceInterface.CarService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -51,12 +53,18 @@ public class CarController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Long> createCat(@RequestBody @Valid CarDTO carDTO){
+    public ResponseEntity<Long> createCat(@RequestBody @Valid CarDTO carDTO, BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            throw new CarValidationException(bindingResult.getAllErrors().toString());
+        }
         return new ResponseEntity<>(carService.createCar(carDTO).getId(), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Long> updateCar(@RequestBody @Valid CarDTO carDTO, @PathVariable("id") Long id){
+    public ResponseEntity<Long> updateCar(@RequestBody @Valid CarDTO carDTO, @PathVariable("id") Long id, BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            throw new CarValidationException(bindingResult.getAllErrors().toString());
+        }
         return ResponseEntity.ok(carService.updateCar(id, carDTO).getId());
     }
 

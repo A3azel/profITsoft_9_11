@@ -133,7 +133,7 @@ public class CarControllerTest {
     }
 
     @Test
-    public void testCreateWithEmptyField() throws Exception{
+    public void testCreateWithNotExistingDriver() throws Exception{
         String carName = "S-Class";
         String brand = "Mercedes-Benz";
         BigDecimal prise = BigDecimal.valueOf(85_000.00).setScale(2);
@@ -149,7 +149,7 @@ public class CarControllerTest {
     }
 
     @Test
-    public void testCreateWithNotExistingDriver() throws Exception{
+    public void testCreateWithEmptyField() throws Exception{
         String carName = "";
         String brand = "";
         BigDecimal prise = BigDecimal.valueOf(85_000.00).setScale(2);
@@ -161,7 +161,7 @@ public class CarControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body)
                 )
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isForbidden());
     }
 
 

@@ -2,6 +2,8 @@ package com.profITsoft.carRental.controller;
 
 import com.profITsoft.carRental.dto.CarDTO;
 import com.profITsoft.carRental.dto.DriverDTO;
+import com.profITsoft.carRental.exeption.CarValidationException;
+import com.profITsoft.carRental.exeption.DriverValidationException;
 import com.profITsoft.carRental.service.serviceInterface.DriverService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,12 +48,18 @@ public class DriverController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<Long> createDriver(@RequestBody @Valid DriverDTO driverDTO){
+    public ResponseEntity<Long> createDriver(@RequestBody @Valid DriverDTO driverDTO, BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            throw new DriverValidationException(bindingResult.getAllErrors().toString());
+        }
         return new ResponseEntity<>(driverService.createDriver(driverDTO).getId(), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Long> updateDriver(@RequestBody @Valid DriverDTO driverDTO, @PathVariable("id") Long id){
+    public ResponseEntity<Long> updateDriver(@RequestBody @Valid DriverDTO driverDTO, @PathVariable("id") Long id, BindingResult bindingResult){
+        if(bindingResult.hasErrors()){
+            throw new DriverValidationException(bindingResult.getAllErrors().toString());
+        }
         return ResponseEntity.ok(driverService.updateDriver(id, driverDTO).getId());
     }
 
