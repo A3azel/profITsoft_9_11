@@ -1,7 +1,7 @@
 package com.profITsoft.carRental.controller;
 
 import com.profITsoft.carRental.dto.CarDTO;
-import com.profITsoft.carRental.exeption.CarValidationException;
+import com.profITsoft.carRental.exeption.EntityValidationException;
 import com.profITsoft.carRental.service.serviceInterface.CarService;
 import com.profITsoft.carRental.validations.ErrorValidator;
 import jakarta.validation.Valid;
@@ -59,7 +59,7 @@ public class CarController {
     public ResponseEntity<Long> createCat(@RequestBody @Valid CarDTO carDTO, BindingResult bindingResult){
         String errorMassage = errorValidator.checkErrors(bindingResult);
         if(!errorMassage.equals("")){
-            throw new CarValidationException(errorMassage);
+            throw new EntityValidationException(errorMassage);
         }
         return new ResponseEntity<>(carService.createCar(carDTO).getId(), HttpStatus.CREATED);
     }
@@ -68,7 +68,7 @@ public class CarController {
     public ResponseEntity<Long> updateCar(@RequestBody @Valid CarDTO carDTO, @PathVariable("id") Long id, BindingResult bindingResult){
         String errorMassage = errorValidator.checkErrors(bindingResult);
         if(!errorMassage.equals("")){
-            throw new CarValidationException(errorMassage);
+            throw new EntityValidationException(errorMassage);
         }
         return ResponseEntity.ok(carService.updateCar(id, carDTO).getId());
     }
@@ -77,16 +77,6 @@ public class CarController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCar(@PathVariable("id") Long id){
         carService.deleteCar(id);
-    }
-
-    @ExceptionHandler(CarValidationException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ResponseEntity<String> handleNoSuchElementFoundException(
-            CarValidationException exception
-    ) {
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(exception.getMessage());
     }
 
 }

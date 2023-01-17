@@ -2,7 +2,7 @@ package com.profITsoft.carRental.controller;
 
 import com.profITsoft.carRental.dto.CarDTO;
 import com.profITsoft.carRental.dto.DriverDTO;
-import com.profITsoft.carRental.exeption.DriverValidationException;
+import com.profITsoft.carRental.exeption.EntityValidationException;
 import com.profITsoft.carRental.service.serviceInterface.DriverService;
 import com.profITsoft.carRental.validations.ErrorValidator;
 import jakarta.validation.Valid;
@@ -52,7 +52,7 @@ public class DriverController {
     public ResponseEntity<Long> createDriver(@RequestBody @Valid DriverDTO driverDTO, BindingResult bindingResult){
         String errorMassage = errorValidator.checkErrors(bindingResult);
         if(!errorMassage.equals("")){
-            throw new DriverValidationException(errorMassage);
+            throw new EntityValidationException(errorMassage);
         }
         return new ResponseEntity<>(driverService.createDriver(driverDTO).getId(), HttpStatus.CREATED);
     }
@@ -61,7 +61,7 @@ public class DriverController {
     public ResponseEntity<Long> updateDriver(@RequestBody @Valid DriverDTO driverDTO, @PathVariable("id") Long id, BindingResult bindingResult){
         String errorMassage = errorValidator.checkErrors(bindingResult);
         if(!errorMassage.equals("")){
-            throw new DriverValidationException(errorMassage);
+            throw new EntityValidationException(errorMassage);
         }
         return ResponseEntity.ok(driverService.updateDriver(id, driverDTO).getId());
     }
@@ -72,13 +72,5 @@ public class DriverController {
         driverService.deleteDriver(id);
     }
 
-    @ExceptionHandler(DriverValidationException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ResponseEntity<String> handleNoSuchElementFoundException(
-            DriverValidationException exception
-    ) {
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(exception.getMessage());
-    }
+
 }
