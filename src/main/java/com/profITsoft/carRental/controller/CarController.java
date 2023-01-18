@@ -61,7 +61,7 @@ public class CarController {
         if(!errorMassage.equals("")){
             throw new EntityValidationException(errorMassage);
         }
-        return new ResponseEntity<>(carService.createCar(carDTO).getId(), HttpStatus.CREATED);
+        return new ResponseEntity<>(carService.createCar(carDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
@@ -70,7 +70,7 @@ public class CarController {
         if(!errorMassage.equals("")){
             throw new EntityValidationException(errorMassage);
         }
-        return ResponseEntity.ok(carService.updateCar(id, carDTO).getId());
+        return ResponseEntity.ok(carService.updateCar(id, carDTO));
     }
 
     @DeleteMapping("/delete/{id}")

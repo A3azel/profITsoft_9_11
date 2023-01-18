@@ -53,9 +53,9 @@ public class DriverServiceI implements DriverService {
 
     @Override
     @Transactional
-    public Driver createDriver(DriverDTO driverDTO) {
+    public Long createDriver(DriverDTO driverDTO) {
         Driver newDriver = driverDtoToDriver(driverDTO);
-        return driverRepository.save(newDriver);
+        return driverRepository.save(newDriver).getId();
     }
 
     @Override
@@ -66,10 +66,10 @@ public class DriverServiceI implements DriverService {
 
     @Override
     @Transactional
-    public Driver updateDriver(Long id, DriverDTO driverDTO) {
+    public Long updateDriver(Long id, DriverDTO driverDTO) {
         Driver newInfo = driverDtoToDriver(driverDTO);
         newInfo.setId(id);
-        return driverRepository.save(newInfo);
+        return driverRepository.save(newInfo).getId();
     }
 
     private Driver driverDtoToDriver(DriverDTO driverDTO){

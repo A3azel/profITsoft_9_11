@@ -54,7 +54,7 @@ public class DriverController {
         if(!errorMassage.equals("")){
             throw new EntityValidationException(errorMassage);
         }
-        return new ResponseEntity<>(driverService.createDriver(driverDTO).getId(), HttpStatus.CREATED);
+        return new ResponseEntity<>(driverService.createDriver(driverDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
@@ -63,7 +63,7 @@ public class DriverController {
         if(!errorMassage.equals("")){
             throw new EntityValidationException(errorMassage);
         }
-        return ResponseEntity.ok(driverService.updateDriver(id, driverDTO).getId());
+        return ResponseEntity.ok(driverService.updateDriver(id, driverDTO));
     }
 
     @DeleteMapping("/delete/{id}")

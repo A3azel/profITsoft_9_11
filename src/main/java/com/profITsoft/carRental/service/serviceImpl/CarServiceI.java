@@ -38,17 +38,17 @@ public class CarServiceI implements CarService {
 
     @Override
     @Transactional
-    public Car createCar(CarDTO carDTO) {
+    public Long createCar(CarDTO carDTO) {
         Car newCar = carDtoToCar(carDTO);
-        return carRepository.save(newCar);
+        return carRepository.save(newCar).getId();
     }
 
     @Override
     @Transactional
-    public Car updateCar(Long id, CarDTO carDTO) {
+    public Long updateCar(Long id, CarDTO carDTO) {
         Car newInfo = carDtoToCar(carDTO);
         newInfo.setId(id);
-        return carRepository.save(newInfo);
+        return carRepository.save(newInfo).getId();
     }
 
     @Override
