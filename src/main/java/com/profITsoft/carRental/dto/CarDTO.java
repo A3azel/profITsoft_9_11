@@ -15,10 +15,8 @@ import java.time.LocalDate;
 @Data
 public class CarDTO {
     private Long id;
-    @NotBlank(message = "This field can't be blank")
     @Size(min = 2, max = 256, message = "Length must be from 2 to 256 characters")
     private String carName;
-    @NotBlank(message = "This field can't be blank")
     @Size(min = 2, max = 64, message = "Length must be from 2 to 64 characters")
     private String brand;
     @NumberFormat(style = NumberFormat.Style.CURRENCY)

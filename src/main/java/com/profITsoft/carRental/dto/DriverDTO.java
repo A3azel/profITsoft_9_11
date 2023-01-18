@@ -14,10 +14,8 @@ import java.util.stream.Collectors;
 @Data
 public class DriverDTO {
     private Long id;
-    @NotBlank(message = "This field can't be blank")
     @Size(min = 2, max = 64, message = "Length must be from 2 to 64 characters")
     private String firstName;
-    @NotBlank(message = "This field can't be blank")
     @Size(min = 2, max = 64, message = "Length must be from 2 to 64 characters")
     private String lastName;
     @Nullable
