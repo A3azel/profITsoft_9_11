@@ -303,7 +303,7 @@ public class CarControllerTest {
         car4.setDriver(driverRepository.findById(1L).orElseThrow(NotFoundException::new));
         carRepository.save(car4);
 
-        mvc.perform(get("/api/v1/car/all/brand/Mercedes-Benz/prise/90000/1")
+        mvc.perform(get("/api/v1/car/all/priseAndBrand/1?brand=Mercedes-Benz&prise=90000")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))

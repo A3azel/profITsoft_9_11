@@ -48,9 +48,9 @@ public class CarController {
         return ResponseEntity.ok(allCars);
     }
 
-    @GetMapping("/all/brand/{brand}/prise/{prise}/{page}")
-    public ResponseEntity<List<CarDTO>> getAllCarByBrandAndPrise(@PageableDefault(size = DEFAULT_PAGE_SIZE) Pageable pageable, @PathVariable("brand") String brand,
-                                                                 @PathVariable("prise") BigDecimal prise, @PathVariable("page") int page){
+    @GetMapping("/all/priseAndBrand/{page}")
+    public ResponseEntity<List<CarDTO>> getAllCarByBrandAndPrise(@PageableDefault(size = DEFAULT_PAGE_SIZE) Pageable pageable, @RequestParam(value = "brand") String brand,
+                                                                 @RequestParam(value = "prise") BigDecimal prise, @PathVariable("page") int page){
         List<CarDTO> allCars = carService.findAllCarByBrandAndPrise(pageable, brand, prise, page);
         return ResponseEntity.ok(allCars);
     }
