@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface CarService {
+    Integer getPageCount(Pageable pageable, int page);
     List<CarDTO> findAllCars(Pageable pageable, int page);
     Long createCar(CarDTO car);
     Long updateCar(Long id, CarDTO car);

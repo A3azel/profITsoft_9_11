@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 public interface DriverRepository extends JpaRepository<Driver, Long> {
     void deleteById(Long id);
     Page<Driver> findAll(Pageable pageable);
+    boolean existsDriverById(Long id);
 }

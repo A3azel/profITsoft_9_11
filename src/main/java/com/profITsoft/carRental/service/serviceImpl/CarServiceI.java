@@ -1,11 +1,14 @@
 package com.profITsoft.carRental.service.serviceImpl;
 
 import com.profITsoft.carRental.dto.CarDTO;
+import com.profITsoft.carRental.dto.DriverDTO;
 import com.profITsoft.carRental.entity.Car;
+import com.profITsoft.carRental.exeption.EntityValidationException;
 import com.profITsoft.carRental.exeption.NotFoundException;
 import com.profITsoft.carRental.repository.CarRepository;
 import com.profITsoft.carRental.repository.DriverRepository;
 import com.profITsoft.carRental.service.serviceInterface.CarService;
+import com.profITsoft.carRental.validations.ErrorValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -28,6 +33,12 @@ public class CarServiceI implements CarService {
         this.driverRepository = driverRepository;
     }
 
+    @Transactional(readOnly = true)
+    public Integer getPageCount(Pageable pageable, int page){
+        Pageable changedPageable = PageRequest.of(page - 1, pageable.getPageSize());
+        return carRepository.findAll(changedPageable).getTotalPages();
+    }
+
     @Override
     @Transactional(readOnly = true)
     public List<CarDTO> findAllCars(Pageable pageable, int page) {
@@ -39,8 +50,12 @@ public class CarServiceI implements CarService {
     @Override
     @Transactional
     public Long createCar(CarDTO carDTO) {
-        Car newCar = carDtoToCar(carDTO);
-        return carRepository.save(newCar).getId();
+        if(driverRepository.existsDriverById(carDTO.getDriverId())){
+            Car newCar = carDtoToCar(carDTO);
+            return carRepository.save(newCar).getId();
+        }
+        throw new EntityValidationException(String.format("Driver with %d id not found", carDTO.getDriverId()));
+
     }
 
     @Override
@@ -87,6 +102,9 @@ public class CarServiceI implements CarService {
         car.setCarName(carDTO.getCarName());
         car.setBrand(carDTO.getBrand());
         car.setCarPrise(carDTO.getCarPrise());
+        if(carDTO.getReleaseDate().isAfter(LocalDate.now())){
+            throw new EntityValidationException("Not valid date");
+        }
         car.setReleaseDate(carDTO.getReleaseDate());
         car.setDriver(driverRepository.findById(carDTO.getDriverId()).orElseThrow(NotFoundException::new));
         return car;

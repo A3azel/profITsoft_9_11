@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/v1/driver",produces="application/json")
+@RequestMapping(path = "/api/v1/driver", produces="application/json")
+@CrossOrigin(origins = "http://localhost:3000")
 public class DriverController {
     private static final int DEFAULT_PAGE_SIZE = 10;
 

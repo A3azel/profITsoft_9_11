@@ -17,7 +17,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/v1/car",produces="application/json")
+@RequestMapping(path = "/api/v1/car", produces="application/json")
+@CrossOrigin(origins = "http://localhost:3000")
 public class CarController {
     private static final int DEFAULT_PAGE_SIZE = 10;
 
@@ -28,6 +29,12 @@ public class CarController {
     public CarController(CarService carService, ErrorValidator errorValidator) {
         this.carService = carService;
         this.errorValidator = errorValidator;
+    }
+
+    @GetMapping("/getPageCount")
+    public ResponseEntity<Integer> getPageCount(@PageableDefault(size = DEFAULT_PAGE_SIZE) Pageable pageable){
+        int totalPagesCount = carService.getPageCount(pageable, 1);
+        return ResponseEntity.ok(totalPagesCount);
     }
 
     @GetMapping("/all/{page}")
